@@ -47,6 +47,57 @@ async function create(){
   console.log(`robot number ${serialNumber} created!`)
 }
 
+async function read() {
+  let robots = await Robot.find({})
+  robots.forEach(robot => console.table(robot.toObject()))
+}
+
+async function updateRobot() {
+  console.clear()
+  console.log(`please select a robot by name: `)
+  let robots = await Robot.find({},{robotName: 1})
+  robots.forEach(robot => console.table(robot.toObject()))
+  await ask(`> `)
+    .then( async selectedBot => await Robot.findOne({ robotName: selectedBot }))
+    .then( async (robot) => {
+      console.log(`selected the field to modify: `)
+      console.table(robot.toObject())
+      let selectedField = await ask(`$> `)
+      return {
+        selectedField,
+        robot
+      }
+    })
+    .then( async (selectedFieldAndBot) => {
+      if(Object.keys(selectedFieldAndBot.robot.toObject()).includes(selectedFieldAndBot.selectedField.trim())){
+        let changeTo = await ask(`what do you want "${selectedFieldAndBot.selectedField}" to become?\n$> `)
+        const changedField = {}
+        changedField[selectedFieldAndBot.selectedField] = changeTo
+        let updatedBot = await Robot.findOneAndUpdate(selectedFieldAndBot.robot, changedField)
+        if(updatedBot){
+          console.log(`bot has been updated!`)
+        }
+      }
+    })
+}
+
+async function deleteRobot() {
+  console.clear();
+  console.log(`select a robot to delete by name: `)
+  let robots = await Robot.find({},{robotName: 1})
+  robots.forEach(robot => console.table(robot.toObject()))
+  await ask(`> `)
+    .then(async (selectedRobotName) => {
+      console.log(`--"${selectedRobotName}"--`)
+      let deletedBot = await Robot.findOneAndDelete({robotName: selectedRobotName})
+      if(deletedBot){
+        console.log(`robot "${deleteRobot.robotName}" deleted`)
+      } else {
+        'cant find a bot by that name'
+      }
+    })
+}
+
 
 async function start(){
   let action = await ask(`Welcome to the robot factory! What do you want to do? \n\n(Create, Read, Update, Delete) $>  `)
@@ -57,11 +108,25 @@ async function start(){
       case 'create':
         await create()
         break;
-    
+      case 'r':
+      case 'read':
+        await read()
+        break;
+      case 'u':
+      case 'update':
+        await updateRobot()
+        break;
+      case 'd':
+      case 'delete':
+        await deleteRobot()
+        break;
       default:
+        console.log(`input not found... `)
+        start()
         break;
     }
   } catch (error) {
+    console.log(`error encountered: ${error}`)
     console.log(`please selection an action: `)
     start()
   }
