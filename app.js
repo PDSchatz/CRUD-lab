@@ -22,7 +22,7 @@ async function create(){
   let robotColor = await ask('What color is this robot?')
   let friend = await ask('Is this robot a friend? Enter Y or N')
   let killer
-  if (friend === 'N') {
+  if (friend === 'N' || friend === 'n') {
     friend = false
     killer = true
     console.log('Oh no! A killer robot!')
