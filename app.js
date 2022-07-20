@@ -88,10 +88,9 @@ async function deleteRobot() {
   robots.forEach(robot => console.table(robot.toObject()))
   await ask(`> `)
     .then(async (selectedRobotName) => {
-      console.log(`--"${selectedRobotName}"--`)
       let deletedBot = await Robot.findOneAndDelete({robotName: selectedRobotName})
       if(deletedBot){
-        console.log(`robot "${deleteRobot.robotName}" deleted`)
+        console.log(`robot "${deletedBot.robotName}" deleted`)
       } else {
         'cant find a bot by that name'
       }
@@ -119,6 +118,10 @@ async function start(){
       case 'd':
       case 'delete':
         await deleteRobot()
+        break;
+      case 'q':
+      case 'quit':
+        process.exit()
         break;
       default:
         console.log(`input not found... `)
